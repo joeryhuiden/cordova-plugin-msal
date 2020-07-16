@@ -201,7 +201,7 @@ public class MsalPlugin extends CordovaPlugin {
                         }
                         authorities.append("    ]\n");
                         data = "{\n" +
-                                "    \"client_id\" : \"" + MsalPlugin.this.clientId + "\",\n" +
+                                "    \"client_id\" : \"" + options.getString("clientId") + "\",\n" +
                                 "    \"account_mode\": \"" + options.getString("accountMode") + "\",\n" +
                                 "    \"authorization_user_agent\" : \"" + options.getString("authorizationUserAgent") + "\",\n" +
                                 "    \"redirect_uri\" : \"msauth://" + MsalPlugin.this.activity.getApplicationContext().getPackageName() + "/" + keyHashUrlFriendly + "\",\n" +
