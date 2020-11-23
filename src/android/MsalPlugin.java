@@ -348,7 +348,7 @@ public class MsalPlugin extends CordovaPlugin {
                                 MsalPlugin.this.callbackContext.error("No account currently exists");
                             } else {
 								
-								                params.setAccount(account);
+				params.setAccount(account);
 								
                                 MsalPlugin.this.appSingleClient.acquireTokenSilent(params.build());
                             }
