@@ -46,8 +46,8 @@ module.exports = {
     getAccounts: function(successCallback, errorCallback) {
         cordova.exec(successCallback, errorCallback, 'MsalPlugin', 'getAccounts', []);
     },
-    signInSilent: function(successCallback, errorCallback, account) {
-        cordova.exec(successCallback, errorCallback, 'MsalPlugin', 'signInSilent', [account]);
+    signInSilent: function(successCallback, errorCallback, account, forceRefresh = false) {
+        cordova.exec(successCallback, errorCallback, 'MsalPlugin', 'signInSilent', [account, forceRefresh]);
     },
     signInInteractive: function(successCallback, errorCallback, signInOptions) {
         if (typeof(signInOptions) === 'undefined') {

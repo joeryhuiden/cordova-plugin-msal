@@ -112,7 +112,7 @@ public class MsalPlugin extends CordovaPlugin {
                 this.getAccounts();
             }
             if (SIGN_IN_SILENT.equals(action)) {
-                this.signinUserSilent(args.length() > 0 ? args.getString(0) : "");
+                this.signinUserSilent(args.length() > 0 ? args.getString(0) : "", args.length() > 1 ? args.getBoolean(1) : false);
             }
             if (SIGN_OUT.equals(action)) {
                 this.signOut(args.length() > 0 ? args.getString(0) : "");
@@ -310,7 +310,7 @@ public class MsalPlugin extends CordovaPlugin {
         }
     }
 
-    private void signinUserSilent(final String account) {
+    private void signinUserSilent(final String account, boolean forceRefresh) {
         if (this.checkConfigInit()) {
             if (SINGLE_ACCOUNT.equals(accountMode)) {
                 cordova.getThreadPool().execute(new Runnable() {
@@ -321,7 +321,7 @@ public class MsalPlugin extends CordovaPlugin {
                             if (MsalPlugin.this.appSingleClient.getCurrentAccount().getCurrentAccount() == null) {
                                 MsalPlugin.this.callbackContext.error("No account currently exists");
                             } else {
-                                IAuthenticationResult silentAuthResult = MsalPlugin.this.appSingleClient.acquireTokenSilent(MsalPlugin.this.scopes, authority);
+                                IAuthenticationResult silentAuthResult = MsalPlugin.this.appSingleClient.acquireTokenSilent(MsalPlugin.this.scopes, authority).withForceRefresh(forceRefresh);
                                 MsalPlugin.this.callbackContext.success(silentAuthResult.getAccessToken());
                             }
                         } catch (InterruptedException e) {
@@ -353,7 +353,7 @@ public class MsalPlugin extends CordovaPlugin {
                                     MsalPlugin.this.scopes,
                                     MsalPlugin.this.appMultipleClient.getAccount(account),
                                     authority
-                            );
+                            ).withForceRefresh(forceRefresh);
                             MsalPlugin.this.callbackContext.success(result.getAccessToken());
                         } catch (InterruptedException e) {
                             MsalPlugin.this.callbackContext.error(e.getMessage());
