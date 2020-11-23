@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.microsoft.identity.client.AcquireTokenParameters;
+import com.microsoft.identity.client.AcquireTokenSilentParameters;
 import com.microsoft.identity.client.AuthenticationCallback;
 import com.microsoft.identity.client.IAccount;
 import com.microsoft.identity.client.IAuthenticationResult;
@@ -312,17 +313,44 @@ public class MsalPlugin extends CordovaPlugin {
 
     private void signinUserSilent(final String account, boolean forceRefresh) {
         if (this.checkConfigInit()) {
+			
+			String authority = MsalPlugin.this.appMultipleClient.getConfiguration().getDefaultAuthority().getAuthorityURL().toString();
+			
+			 AcquireTokenSilentParameters.Builder params = new AcquireTokenSilentParameters.Builder()
+				.startAuthorizationFromActivity(MsalPlugin.this.activity)
+				.withScopes(Arrays.asList(MsalPlugin.this.scopes))
+				.setForceRefresh(forceRefresh)		
+				.setAuthority(authority)
+				.withCallback(new AuthenticationCallback() {
+					@Override
+					public void onCancel() {
+						MsalPlugin.this.callbackContext.error("Login cancelled.");
+					}
+
+					@Override
+					public void onSuccess(IAuthenticationResult iAuthenticationResult) {
+						MsalPlugin.this.callbackContext.success(iAuthenticationResult.getAccessToken());
+					}
+
+					@Override
+					public void onError(MsalException e) {
+						MsalPlugin.this.callbackContext.error(e.getMessage());
+					}
+				});
+			
             if (SINGLE_ACCOUNT.equals(accountMode)) {
                 cordova.getThreadPool().execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            String authority = MsalPlugin.this.appSingleClient.getConfiguration().getDefaultAuthority().getAuthorityURL().toString();
+                            //String authority = MsalPlugin.this.appSingleClient.getConfiguration().getDefaultAuthority().getAuthorityURL().toString();
                             if (MsalPlugin.this.appSingleClient.getCurrentAccount().getCurrentAccount() == null) {
                                 MsalPlugin.this.callbackContext.error("No account currently exists");
                             } else {
-                                IAuthenticationResult silentAuthResult = MsalPlugin.this.appSingleClient.acquireTokenSilent(MsalPlugin.this.scopes, authority).withForceRefresh(forceRefresh);
-                                MsalPlugin.this.callbackContext.success(silentAuthResult.getAccessToken());
+								
+				params.setAccount(account);
+								
+                                MsalPlugin.this.appSingleClient.acquireTokenSilent(params.build());
                             }
                         } catch (InterruptedException e) {
                             MsalPlugin.this.callbackContext.error(e.getMessage());
@@ -347,14 +375,18 @@ public class MsalPlugin extends CordovaPlugin {
                             if (!found) {
                                 MsalPlugin.this.callbackContext.error("Account not found");
                                 return;
-                            }
-                            String authority = MsalPlugin.this.appMultipleClient.getConfiguration().getDefaultAuthority().getAuthorityURL().toString();
-                            IAuthenticationResult result = MsalPlugin.this.appMultipleClient.acquireTokenSilent(
-                                    MsalPlugin.this.scopes,
-                                    MsalPlugin.this.appMultipleClient.getAccount(account),
-                                    authority
-                            ).withForceRefresh(forceRefresh);
-                            MsalPlugin.this.callbackContext.success(result.getAccessToken());
+                            }                            
+                            // IAuthenticationResult result = MsalPlugin.this.appMultipleClient.acquireTokenSilent(
+                                  // MsalPlugin.this.scopes,
+                                  // MsalPlugin.this.appMultipleClient.getAccount(account),
+                                  // authority
+                            // );
+                            // MsalPlugin.this.callbackContext.success(result.getAccessToken());
+                          
+                            params.setAccount(MsalPlugin.this.appMultipleClient.getAccount(account));
+
+                            MsalPlugin.this.appSingleClient.acquireTokenSilent(params.build());
+
                         } catch (InterruptedException e) {
                             MsalPlugin.this.callbackContext.error(e.getMessage());
                         } catch (MsalException e) {
