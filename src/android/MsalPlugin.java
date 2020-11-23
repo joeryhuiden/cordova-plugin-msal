@@ -348,7 +348,7 @@ public class MsalPlugin extends CordovaPlugin {
                                 MsalPlugin.this.callbackContext.error("No account currently exists");
                             } else {
 								
-								params.setAccount(account);
+								                params.setAccount(account);
 								
                                 MsalPlugin.this.appSingleClient.acquireTokenSilent(params.build());
                             }
@@ -377,15 +377,16 @@ public class MsalPlugin extends CordovaPlugin {
                                 return;
                             }                            
                             // IAuthenticationResult result = MsalPlugin.this.appMultipleClient.acquireTokenSilent(
-                                    // MsalPlugin.this.scopes,
-                                    // MsalPlugin.this.appMultipleClient.getAccount(account),
-                                    // authority
+                                  // MsalPlugin.this.scopes,
+                                  // MsalPlugin.this.appMultipleClient.getAccount(account),
+                                  // authority
                             // );
                             // MsalPlugin.this.callbackContext.success(result.getAccessToken());
-							params.setAccount(MsalPlugin.this.appMultipleClient.getAccount(account));
-							
-							MsalPlugin.this.appSingleClient.acquireTokenSilent(params.build());
-							
+                          
+                            params.setAccount(MsalPlugin.this.appMultipleClient.getAccount(account));
+
+                            MsalPlugin.this.appSingleClient.acquireTokenSilent(params.build());
+
                         } catch (InterruptedException e) {
                             MsalPlugin.this.callbackContext.error(e.getMessage());
                         } catch (MsalException e) {
